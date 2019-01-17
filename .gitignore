@@ -22,3 +22,4 @@ env.bak/
 venv.bak/
 venv-win/
 
+*.csv

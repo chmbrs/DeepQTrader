@@ -8,53 +8,81 @@ if len(sys.argv) != 4:
 
 stock_name, window_size, episode_count = sys.argv[1], int(sys.argv[2]), int(sys.argv[3])
 
-agent = Agent(window_size)
+#Instantiate an Agent
+agent = Agent(state_size=window_size)
 
 data = getStockDataVec(stock_name)
 
-print(data)
-
-l = len(data) - 1
+data_lenght = len(data) - 1
 
 batch_size = 32
 
-for e in range(episode_count + 1):
-	print("Episode " + str(e) + "/" + str(episode_count))
+last_higher_profit = 0
 
-	state = getState(data, 0, window_size + 1)
+for episode in range(episode_count + 1):
+    print("Episode " + str(episode) + "/" + str(episode_count))
 
-	total_profit = 0
-	agent.inventory = []
+    state = getState(data, 0, window_size + 1)
 
-	for t in range(l):
-		action = agent.act(state)
+    total_profit = 0
+    agent.inventory = []
 
-		# sit
-		next_state = getState(data, t + 1, window_size + 1)
-		reward = 0
+    previous_action = 0
+    buy_action_count = 0
+    no_action_count = 0
 
-		if action == 1: # buy
-			agent.inventory.append(data[t])
-			print("Buy: " + formatPrice(data[t]))
+    for t in range(data_lenght):
+        print(f'{t}/{data_lenght}')
 
-		elif action == 2 and len(agent.inventory) > 0: # sell
-			bought_price = agent.inventory.pop(0)
-			reward = max(data[t] - bought_price, 0)
-			total_profit += data[t] - bought_price
-			print("Sell: " + formatPrice(data[t]) + " | Profit: " + formatPrice(data[t] - bought_price))
+        action = agent.act(state)
 
-		done = True if t == l - 1 else False
+        if action == 1 and previous_action == 1:
+            buy_action_count += 1
+        if action == 0 and previous_action == 0:
+            no_action_count += 1
 
-		agent.memory.append((state, action, reward, next_state, done))
-		state = next_state
+        # no-action
+        next_state = getState(data, t + 1, window_size + 1)
+        reward = 0
 
-		if done:
-			print("--------------------------------")
-			print("Total Profit: " + formatPrice(total_profit))
-			print("--------------------------------")
+        if action == 1: # buy
+            agent.inventory.append(data[t])
+            print("Buy: " + formatPrice(data[t]))
 
-		if len(agent.memory) > batch_size:
-			agent.expReplay(batch_size)
+        elif action == 2 and len(agent.inventory) > 0: # sell
+            bought_price = agent.inventory.pop(0)
+            reward = (data[t] - bought_price) * 100
+            total_profit += data[t] - bought_price
+            print("Sell: " + formatPrice(data[t]) + " | Profit: " + formatPrice(data[t] - bought_price))
 
-	if e % 10 == 0:
-		agent.model.save("models/model_ep" + str(e))
+        # Check if there are 20 consecutives buys
+        if buy_action_count >= 20:
+            reward = -500
+            buy_action_count = 0
+        # Check if there are 50 consecutives no-actions
+        if no_action_count >= 50:
+            reward = -500
+            no_action_count = 0
+
+        done = True if t == data_lenght - 1 else False
+
+        agent.memory.append((state, action, reward, next_state, done))
+
+        state = next_state
+        previous_action = action
+
+        if done:
+            print("--------------------------------")
+            print("Total Profit: " + formatPrice(total_profit))
+            print("--------------------------------")
+
+        if len(agent.memory) > batch_size:
+            agent.expReplay(batch_size)
+
+    if total_profit > last_higher_profit:
+    # if e % 10 == 0:
+        last_higher_profit = total_profit
+        total_profit = 34.5546456
+        profit = str(total_profit).split('.')
+
+        agent.model.save(f"models/model_ep{episode}_profit{profit[0]}")
