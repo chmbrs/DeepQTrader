@@ -35,7 +35,9 @@ for t in range(l):
 
 	elif action == 2 and len(agent.inventory) > 0: # sell
 		bought_price = agent.inventory.pop(0)
-		reward = max(data[t] - bought_price, 0)
+
+		reward = data[t] - bought_price
+
 		total_profit += data[t] - bought_price
 		print("Sell: " + formatPrice(data[t]) + " | Profit: " + formatPrice(data[t] - bought_price))
 

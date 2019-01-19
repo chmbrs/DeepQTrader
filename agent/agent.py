@@ -9,9 +9,9 @@ import random
 from collections import deque
 
 class Agent:
-	def __init__(self, state_size, is_eval=False, model_name=""):
+	def __init__(self, state_shape, is_eval=False, model_name=""):
 
-		self.state_size = state_size # normalized previous days
+		self.state_shape = state_shape # normalized previous days
 		self.action_size = 3 # sit, buy, sell
 		self.memory = deque(maxlen=1000)
 		self.inventory = []
@@ -29,7 +29,7 @@ class Agent:
 
 		model = Sequential()
 
-		model.add(Dense(units=64, input_dim=self.state_size, activation="relu"))
+		model.add(Dense(units=64, input_dim=self.state_shape, activation="relu"))
 		model.add(Dense(units=32, activation="relu"))
 		model.add(Dense(units=8, activation="relu"))
 		model.add(Dense(self.action_size, activation="linear"))
@@ -63,4 +63,4 @@ class Agent:
 			self.model.fit(state, target_f, epochs=1, verbose=0)
 
 		if self.epsilon > self.epsilon_min:
-			self.epsilon *= self.epsilon_decay 
+			self.epsilon *= self.epsilon_decay
