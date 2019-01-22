@@ -41,7 +41,8 @@ for episode in range(episode_count + 1):
 	no_action_count = 0
 
 	for step in range(data_lenght):
-		print(f'{step}/{data_lenght}')
+		if step % 10:
+			print(f'{step}/{data_lenght}')
 
 		action = agent.act(state)
 
@@ -63,7 +64,7 @@ for episode in range(episode_count + 1):
 
 			# Update the Action column with buy-action
 			df.iloc[step, -1] = 1
-			
+
 
 		elif action == 2 and len(agent.inventory) > 0: # sell
 			bought_price = agent.inventory.pop(0)
