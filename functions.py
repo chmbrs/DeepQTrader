@@ -47,17 +47,22 @@ from sklearn import preprocessing
 # returns an an n-day state representation ending at time t
 def getState2(data, step, window_size):
 
-	block = data.iloc[step : window_size].copy()
-	# print(f'block\n{block}')
+	current_position = step - window_size + 1
+
+	if current_position >= 0:
+		block = data.iloc[current_position : step + 1].copy()
+	else:
+		block = -current_position * data.iloc[0].copy() + data.iloc[0 : step + 1].copy()
+
 
 	for col in block.columns:  # go through all of the columns
 		block[col] = preprocessing.scale(block[col].values)  # scale between -1 and 1.
 
 	# Create the array
-	array_block = []
+	sequential_data = []
 	for i in block.values:  # iterate over the values
-		array_block.append([n for n in i])  # store all
+		sequential_data.append([n for n in i])  # store all
 
 	# print(f'minmax\n{np.array(array_block)}')
 
-	return np.array(array_block)
+	return np.array(sequential_data)

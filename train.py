@@ -2,8 +2,6 @@ from agent.agent import Agent
 from functions import *
 import sys
 
-
-
 import pandas as pd
 
 if len(sys.argv) != 4:
@@ -12,8 +10,7 @@ if len(sys.argv) != 4:
 
 stock_name, window_size, episode_count = sys.argv[1], int(sys.argv[2]), int(sys.argv[3])
 
-# data = getStockDataVec(stock_name)
-stock_name='bit1'
+# stock_name='bit1'
 df = pd.read_csv("./data/" + stock_name + ".csv")
 
 data = df.loc[:, ~df.columns.isin(['Action', 'Timestamp'])]
@@ -96,7 +93,8 @@ for episode in range(episode_count + 1):
 
 		done = True if step == data_lenght - 1 else False
 
-		agent.memory.append((state, action, reward, next_state, done))
+		if not step <= window_size:
+			agent.memory.append((state, action, reward, next_state, done))
 
 		state = next_state
 		previous_action = action
@@ -106,7 +104,7 @@ for episode in range(episode_count + 1):
 			print("Total Profit: " + formatPrice(total_profit))
 			print("--------------------------------")
 
-		if len(agent.memory) > batch_size:
+		if len(agent.memory) > batch_size + window_size:
 			agent.expReplay(batch_size)
 
 		df.to_csv(f'df_ep{episode}.csv')
