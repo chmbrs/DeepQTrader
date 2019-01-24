@@ -43,26 +43,34 @@ def getState(data, step, window_size):
 	return np.array([res])
 
 from sklearn import preprocessing
+from collections import deque
 
 # returns an an n-day state representation ending at time t
 def getState2(data, step, window_size):
+    block = []
 
-	current_position = step - window_size + 1
+    current_position = step - window_size + 1
 
-	if current_position >= 0:
-		block = data.iloc[current_position : step + 1].copy()
-	else:
-		block = -current_position * data.iloc[0].copy() + data.iloc[0 : step + 1].copy()
+    if current_position >= 0:
+        block = data.iloc[current_position : step + 1].copy()
+    else:
+        block = data.iloc[0 : window_size].copy()
 
+    for col in block.columns:  # go through all of the columns
+        block[col] = preprocessing.scale(block[col].values)  # scale between -1 and 1.
 
-	for col in block.columns:  # go through all of the columns
-		block[col] = preprocessing.scale(block[col].values)  # scale between -1 and 1.
+    # Create the array
+    sequential_data = [] # This is a list that will CONTAIN the sequences
+    prev_days = deque(maxlen=window_size) # This will be our actual sequences
 
-	# Create the array
-	sequential_data = []
-	for i in block.values:  # iterate over the values
-		sequential_data.append([n for n in i])  # store all
+    for i in block.values:  # iterate over the values
+        prev_days.append([n for n in i])  # store all
+        if len(prev_days) == window_size:
+            sequential_data.append(np.array(prev_days))
 
-	# print(f'minmax\n{np.array(array_block)}')
+    # For creating the third dimension
+    X = []
+    for seq in sequential_data:  # going over our new sequential data
+        X.append(seq)
 
-	return np.array(sequential_data)
+    return np.array(X)

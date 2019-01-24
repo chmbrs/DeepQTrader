@@ -18,7 +18,7 @@ python3 train bit1 10 1000
 
 Then when training finishes (minimum 200 episodes for results):
 ```
-python evaluate.py bit2 model_ep1000
+python3 evaluate.py bit2 model_ep1000
 ```
 
 ## References
