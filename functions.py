@@ -1,6 +1,11 @@
 import numpy as np
 import math
 
+from plotly import tools
+import plotly.offline as py
+import plotly.graph_objs as go
+import plotly.figure_factory as ff
+
 
 # prints formatted price
 def formatPrice(n):
@@ -74,3 +79,39 @@ def getState2(data, step, window_size):
         X.append(seq)
 
     return np.array(X)
+
+def plot(df, total_profit, episode, save=False):
+
+    profit = str(total_profit).split('.')
+    # Plot
+
+    #df.to_csv(f'df_ep{episode}.csv')
+    price = go.Scatter(x=df.index,
+                        y=df['Close'],
+                        name='Price',
+                        text= df['Action'])
+    action = go.Scatter(x=df.index,
+                    y=df['Action'],
+                    name='Buy (1) Sit (0) Sell (-1)',
+                    yaxis='y2',
+                    mode='markers',
+                    marker = dict(size = 4),)
+
+    # fig = tools.make_subplots(rows=2)
+    #
+    # fig.append_trace(price, 1, 1)
+    # fig.append_trace(action, 2, 1)
+
+
+    graphs = [action, price]
+    layout = go.Layout(title=f'model_ep{episode}_profit:{profit[0]}',
+                        xaxis=dict(title='Price'),
+                        yaxis2=dict(title='Sell    -    Sit    -    Buy',
+                        overlaying='y',
+                        side='right'))
+    fig = go.Figure(data=graphs, layout=layout)
+
+    if save:
+        py.plot(fig, filename=f'images/model_ep{episode}_profit{profit[0]}.html')
+    else:
+        py.plot(fig)

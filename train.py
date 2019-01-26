@@ -1,30 +1,27 @@
-from plotly import tools
-import plotly.offline as py
-import plotly.graph_objs as go
-import plotly.figure_factory as ff
+import sys
+if len(sys.argv) != 4:
+    print("Usage: python3 train.py [stock] [window] [episodes]")
+    exit()
 
 from agent.agent import Agent
 from functions import *
-import sys
 
 import pandas as pd
 
 from datetime import datetime
 
-if len(sys.argv) != 4:
-    print("Usage: python3 train.py [stock] [window] [episodes]")
-    exit()
-
 stock_name, window_size, episode_count = sys.argv[1], int(sys.argv[2]), int(sys.argv[3])
 
-# stock_name='bit1'
+stock_name='bit1'
 df = pd.read_csv("./data/" + stock_name + ".csv")
 
 data = df.loc[:, ~df.columns.isin(['Action', 'Timestamp'])]
 
+data.shape
 #(window_size, columns)
-state_shape = (window_size, len(data.columns))
 
+
+state_shape = (window_size, len(data.columns))
 agent = Agent(state_shape=state_shape)
 
 data_lenght = len(data) - 1
@@ -38,7 +35,7 @@ for episode in range(episode_count + 1):
 
     print("Episode " + str(episode) + "/" + str(episode_count))
 
-    state = getState2(data, 0, window_size)
+    state = getState2(data, 0, 60)
 
     total_profit = 0
     agent.inventory = []
@@ -55,8 +52,13 @@ for episode in range(episode_count + 1):
 
         if action == 1 and previous_action == 1:
             buy_action_count += 1
+        else:
+            buy_action_count = 0
+
         if action == 0 and previous_action == 0:
             no_action_count += 1
+        else:
+            no_action_count = 0
 
         # no-action
         next_state = getState2(data, step + 1, window_size)
@@ -75,11 +77,11 @@ for episode in range(episode_count + 1):
         elif action == 2 and len(agent.inventory) > 0: # sell
             bought_price = agent.inventory.pop(0)
 
-            reward = max(data.iloc[step, 3] - bought_price, 0)
+            reward = data.iloc[step, 3] - bought_price
 
-            # if reward == 0:
-            # 	reward = -1
-            # 	print(f'0 gain penalty')
+            if reward == 0:
+            	reward = -1
+            	print(f'0 gain penalty')
 
             total_profit += data.iloc[step, 3] - bought_price
             print("Sell: " + formatPrice(data.iloc[step, 3]) +
@@ -89,16 +91,16 @@ for episode in range(episode_count + 1):
             df.iloc[step, -1] = -1
 
 
-        # # Check if there are 20 consecutives buys
-        # if buy_action_count >= 20:
-        # 	reward = -500
-        # 	print(f'excess buys penalty')
-        # 	buy_action_count = 0
-        # # Check if there are 50 consecutives no-actions
-        # if no_action_count >= 50:
-        # 	reward = -500
-        # 	no_action_count = 0
-        # 	print(f'no-action penalty')
+        # Check if there are 20 consecutives buys
+        if buy_action_count >= 20:
+        	reward = -50
+        	print(f'excess buys penalty')
+        	buy_action_count = 0
+        # Check if there are 50 consecutives no-actions
+        if no_action_count >= 50:
+        	reward = -50
+        	no_action_count = 0
+        	print(f'no-action penalty')
 
         done = True if step == data_lenght - 1 else False
 
@@ -118,25 +120,14 @@ for episode in range(episode_count + 1):
         # if len(agent.memory) > batch_size + window_size:
         # 	agent.expReplay(batch_size)
 
+    # Plor each n episodes
+    if episode % 10 == 0:
+        plot(df, total_profit, episode)
 
-    if episode % 5 == 0:
-        #df.to_csv(f'df_ep{episode}.csv')
-        price = go.Scatter(x=df.index,
-                            y=df['Close'])
-        action = go.Bar(x=df.index,
-                        y=df['Action'])
 
-        fig = tools.make_subplots(rows=2)
-
-        fig.append_trace(price, 1, 1)
-        fig.append_trace(action, 2, 1)
-
-        profit = str(total_profit).split('.')
-
-        py.plot(fig)#, filename=f'model_ep{episode}_profit{profit[0]}.html')
-
-    # if e % 10 == 0:
     if total_profit > last_higher_profit:
+        plot(df, total_profit, episode, save=True)
+
         last_higher_profit = total_profit
         profit = str(total_profit).split('.')
-        agent.model.save(f"models/model_ep{episode}_profit{profit[0]}")
+        agent.model.save(f'models/model_ep{episode}_profit:{profit[0]}')
