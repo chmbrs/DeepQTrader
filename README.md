@@ -18,7 +18,8 @@ See EpisodesViz notebook
 - State shape is the window_size x columns.
 - Training happens at each state.
 - Data sequences can have n-dimensions.
-- Visualization plots appear at the end of each episode. 
+- Visualization plots appear at each tenth episode.
+- Most profitable models are saved and a plot is shown.
 
 ## Installation
 
@@ -28,12 +29,15 @@ To run in your local machine, follow these steps:
 1. Install the dependencies with `$ pip3 install`.
 2. Create the models directory on the project root. `$ mkdir model`
 3. Grab the data, choose the window length and the number of episodes.
+
 (**bit1.csv** or **bit2.csv** into `$ data/` are ready-to-use examples.)
+
 4. Train the model with the selected parameters.
 ```
 $ python3 train.py bit1 10 1000
 ```
-The code is going to generate an HTML plot for each episode, containing all the actions it took along the training.
+The code then is going to generate an HTML plot at each tenth episode, containing all the actions it took along the training. 
+The most profitable models are saved aswell as their plots.
 
 
 ## How to use?
