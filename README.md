@@ -19,7 +19,7 @@ See EpisodesViz notebook
 - Training happens at each state.
 - Data sequences can have n-dimensions.
 - Visualization plots appear at each tenth episode.
-- Most profitable models are saved and a plot is shown.
+- Most profitable models and plots are saved.
 
 ## Installation
 
