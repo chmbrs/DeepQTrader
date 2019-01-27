@@ -9,9 +9,15 @@ The simple prediction of future prices with RNNs or CNNs is not enough to make *
 
 This project is an attempt to see if is possible to use reinforcement and Q learning to predict and **act** super-humanly upon   cryptocurrency prices and positions, despite the lack of evidence.
 
-## Results
+## Screenshots
 
 See EpisodesViz notebook
+
+## Features
+- Keras neural network.
+- Training happens at each window.
+- Data can have many dimensions.
+- Vizualization plots with the actions per episode. 
 
 ## Running the Code
 
