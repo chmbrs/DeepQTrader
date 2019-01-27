@@ -60,8 +60,8 @@ Feedbacks, questions, critics, ideas, etc. are extremely welcome.
 
 ## References
 
-[Deep Q-Learning with Keras and Gym](https://keon.io/deep-q-learning/) - Q-learning overview and Agent skeleton code
-[OpenAI SppiningUp](https://spinningup.openai.com/en/latest/) - Reinforcement learning study material
+- [Deep Q-Learning with Keras and Gym](https://keon.io/deep-q-learning/) - Q-learning overview and Agent skeleton code
+- [OpenAI SppiningUp](https://spinningup.openai.com/en/latest/) - Reinforcement learning study material
 
 ## Credits
 Inspired and initially forked from [Deep Q-Learning](https://github.com/edwardhdlu/q-trader)
